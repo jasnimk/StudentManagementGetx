@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:student_management_getx/get/get.dart'; // Ensure correct import
+import 'package:student_management_getx/controllers/student_controller.dart';
 import 'package:student_management_getx/screens/add_student.dart';
 import 'package:student_management_getx/widgets/widgets.dart';
 
 class HomeScreen extends StatelessWidget {
-  final StudentController studentController = Get.put(StudentController());
+  HomeScreen({super.key});
 
-  HomeScreen({Key? key}) : super(key: key) {
-    // Load students when the screen is created
-    studentController.loadStudents();
-  }
+  final StudentController studentController = Get.put(StudentController());
 
   @override
   Widget build(BuildContext context) {
+    studentController.loadStudents();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Student Management'),
@@ -35,7 +34,7 @@ class HomeScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              onChanged: (value) => studentController.setSearchQuery(value),
+              onChanged: studentController.setSearchQuery,
               decoration: const InputDecoration(
                 labelText: 'Search Students',
                 prefixIcon: Icon(Icons.search),
@@ -87,7 +86,8 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           studentController.clearImage();
-          Get.to(() => const AddStudentScreen())?.then((_) {
+          studentController.clearControllers();
+          Get.to(() => AddStudentScreen())?.then((_) {
             studentController.loadStudents();
           });
         },

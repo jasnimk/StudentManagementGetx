@@ -1,51 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:student_management_getx/get/get.dart';
+import 'package:student_management_getx/controllers/student_controller.dart';
 import 'package:student_management_getx/model/student_model.dart';
 import 'package:student_management_getx/widgets/widgets.dart';
 
-class AddStudentScreen extends StatefulWidget {
-  const AddStudentScreen({Key? key}) : super(key: key);
+class AddStudentScreen extends StatelessWidget {
+  AddStudentScreen({super.key});
 
-  @override
-  State<AddStudentScreen> createState() => _AddStudentScreenState();
-}
-
-class _AddStudentScreenState extends State<AddStudentScreen> {
   final _formKey = GlobalKey<FormState>();
   final StudentController controller = Get.put(StudentController());
-
-  late TextEditingController _nameController;
-  late TextEditingController _admissionController;
-  late TextEditingController _courseController;
-  late TextEditingController _contactController;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController();
-    _admissionController = TextEditingController();
-    _courseController = TextEditingController();
-    _contactController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _admissionController.dispose();
-    _courseController.dispose();
-    _contactController.dispose();
-    super.dispose();
-  }
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final student = Student(
-        name: _nameController.text,
-        admissionNumber: _admissionController.text,
-        course: _courseController.text,
-        contact: _contactController.text,
+        name: controller.nameController.text,
+        admissionNumber: controller.admissionController.text,
+        course: controller.courseController.text,
+        contact: controller.contactController.text,
         imagePath: controller.imageFile.value?.path,
       );
 
@@ -59,7 +31,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
     }
   }
 
-  void _showImagePickerDialog() {
+  void _showImagePickerDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -104,7 +76,7 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 GestureDetector(
-                  onTap: _showImagePickerDialog,
+                  onTap: () => _showImagePickerDialog(context),
                   child: Obx(() {
                     return Container(
                       height: 200,
@@ -132,22 +104,22 @@ class _AddStudentScreenState extends State<AddStudentScreen> {
                 ),
                 const SizedBox(height: 20),
                 buildTextFormField(
-                    controller: _nameController,
+                    controller: controller.nameController,
                     label: 'Name',
                     validationMessage: 'Enter name'),
                 const SizedBox(height: 16),
                 buildTextFormField(
-                    controller: _admissionController,
-                    label: 'Admission Numbeer',
+                    controller: controller.admissionController,
+                    label: 'Admission Number',
                     validationMessage: 'Enter admission number'),
                 const SizedBox(height: 16),
                 buildTextFormField(
-                    controller: _courseController,
+                    controller: controller.courseController,
                     label: 'Course',
                     validationMessage: 'Enter course'),
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: _contactController,
+                  controller: controller.contactController,
                   decoration: const InputDecoration(
                     labelText: 'Contact',
                     border: OutlineInputBorder(),

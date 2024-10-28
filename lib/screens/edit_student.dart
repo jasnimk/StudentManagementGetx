@@ -2,64 +2,38 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:student_management_getx/get/get.dart';
+import 'package:student_management_getx/controllers/student_controller.dart';
 import 'package:student_management_getx/model/student_model.dart';
 import 'package:student_management_getx/widgets/widgets.dart';
 
-class EditStudentScreen extends StatefulWidget {
+class EditStudentScreen extends StatelessWidget {
   final Student student;
-
-  const EditStudentScreen({super.key, required this.student});
-
-  @override
-  State<EditStudentScreen> createState() => _EditStudentScreenState();
-}
-
-class _EditStudentScreenState extends State<EditStudentScreen> {
   final _formKey = GlobalKey<FormState>();
   final StudentController controller = Get.put(StudentController());
 
-  late TextEditingController _nameController;
-  late TextEditingController _admissionController;
-  late TextEditingController _courseController;
-  late TextEditingController _contactController;
+  EditStudentScreen({super.key, required this.student}) {
+    controller.nameController.text = student.name;
+    controller.admissionController.text = student.admissionNumber;
+    controller.courseController.text = student.course;
+    controller.contactController.text = student.contact;
 
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.student.name);
-    _admissionController =
-        TextEditingController(text: widget.student.admissionNumber);
-    _courseController = TextEditingController(text: widget.student.course);
-    _contactController = TextEditingController(text: widget.student.contact);
-
-    // Set the image in the controller
-    if (widget.student.imagePath != null) {
-      controller.imageFile.value = File(widget.student.imagePath!);
+    if (student.imagePath != null) {
+      controller.imageFile.value = File(student.imagePath!);
     }
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _admissionController.dispose();
-    _courseController.dispose();
-    _contactController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submitForm() async {
+  Future<void> _submitForm(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      final student = Student(
-        id: widget.student.id,
-        name: _nameController.text,
-        admissionNumber: _admissionController.text,
-        course: _courseController.text,
-        contact: _contactController.text,
-        imagePath: controller.imageFile.value?.path ?? widget.student.imagePath,
+      final updatedStudent = Student(
+        id: student.id,
+        name: controller.nameController.text,
+        admissionNumber: controller.admissionController.text,
+        course: controller.courseController.text,
+        contact: controller.contactController.text,
+        imagePath: controller.imageFile.value?.path ?? student.imagePath,
       );
 
-      await controller.updateStudent(student);
+      await controller.updateStudent(updatedStudent);
       Get.back();
       Get.snackbar(
         'Success',
@@ -69,7 +43,7 @@ class _EditStudentScreenState extends State<EditStudentScreen> {
     }
   }
 
-  void _showImagePickerDialog() {
+  void _showImagePickerDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -114,7 +88,7 @@ class _EditStudentScreenState extends State<EditStudentScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 GestureDetector(
-                  onTap: _showImagePickerDialog,
+                  onTap: () => _showImagePickerDialog(context),
                   child: Obx(() {
                     return Container(
                       height: 200,
@@ -142,22 +116,22 @@ class _EditStudentScreenState extends State<EditStudentScreen> {
                 ),
                 const SizedBox(height: 20),
                 buildTextFormField(
-                    controller: _nameController,
+                    controller: controller.nameController,
                     label: 'Name',
                     validationMessage: 'Enter name'),
                 const SizedBox(height: 16),
                 buildTextFormField(
-                    controller: _admissionController,
-                    label: 'Admission Numbeer',
+                    controller: controller.admissionController,
+                    label: 'Admission Number',
                     validationMessage: 'Enter admission number'),
                 const SizedBox(height: 16),
                 buildTextFormField(
-                    controller: _courseController,
+                    controller: controller.courseController,
                     label: 'Course',
                     validationMessage: 'Enter course'),
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: _contactController,
+                  controller: controller.contactController,
                   decoration: const InputDecoration(
                     labelText: 'Contact',
                     border: OutlineInputBorder(),
@@ -172,7 +146,7 @@ class _EditStudentScreenState extends State<EditStudentScreen> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: () => _submitForm(context),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(

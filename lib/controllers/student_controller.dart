@@ -1,16 +1,23 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:student_management_getx/controllers/database_helper.dart';
+import 'package:student_management_getx/db/database_helper.dart';
 import 'package:student_management_getx/model/student_model.dart';
 
 class StudentController extends GetxController {
-  var students = <Student>[].obs; // Observable list of students
-  var isGridView = true.obs; // Observable for grid view
-  var imageFile = Rx<File?>(null); // Observable for image file
-  var isLoading = false.obs; // Observable for loading state
-  var searchQuery = ''.obs; // Observable for search query
+  var students = <Student>[].obs;
+  var isGridView = true.obs;
+  var imageFile = Rx<File?>(null);
+  var isLoading = false.obs;
+  var searchQuery = ''.obs;
+  var student1 = Rx<Student?>(null);
+
+  final nameController = TextEditingController();
+  final admissionController = TextEditingController();
+  final courseController = TextEditingController();
+  final contactController = TextEditingController();
 
   List<Student> get filteredStudents {
     return students.where((student) {
@@ -21,6 +28,23 @@ class StudentController extends GetxController {
               .toLowerCase()
               .contains(searchQuery.value.toLowerCase());
     }).toList();
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    admissionController.dispose();
+    courseController.dispose();
+    contactController.dispose();
+    super.onClose();
+  }
+
+  void clearControllers() {
+    nameController.clear();
+    admissionController.clear();
+    courseController.clear();
+    contactController.clear();
+    clearImage();
   }
 
   void toggleView() {
@@ -96,6 +120,7 @@ class StudentController extends GetxController {
       );
 
       await updateStudent1(updatedStudent);
+      student1.value = updatedStudent;
       await loadStudents();
     } catch (e) {
       throw e;
@@ -131,5 +156,24 @@ class StudentController extends GetxController {
 
   void clearImage() {
     imageFile.value = null;
+  }
+
+  Future<void> getStudent1(int id) async {
+    isLoading.value = true;
+    student1.value = null;
+    try {
+      student1.value = await getStudent(id);
+      if (student1.value == null) {
+        throw Exception('Student not found');
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to load student details',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 }
